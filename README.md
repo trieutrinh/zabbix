@@ -1,2 +1,2 @@
 # zabbix
-Install Zabbix
+Install Zabbix version 6 LTS
