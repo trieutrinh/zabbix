@@ -16,7 +16,7 @@ systemctl enable postgresql
 sed -i 's/ident/md5/g' /var/lib/pgsql/data/pg_hba.conf
 systemctl restart postgresql
 sudo -u postgres createuser --pwprompt zabbix
-##Check Password input, sample Pa$$W0rd
+##Check Password input, sample PassW0rd, 
 sudo -u postgres createdb -O zabbix zabbix 
 zcat /usr/share/doc/zabbix-sql-scripts/postgresql/server.sql.gz | sudo -u zabbix psql zabbix 
 mv /etc/zabbix/zabbix_server.conf /etc/zabbix/zabbix_server.conf.bk
@@ -50,6 +50,7 @@ firewall-cmd --permanent --add-port=10050/tcp
 firewall-cmd --permanent --add-port=10051/tcp 
 firewall-cmd --permanent --add-port=80/tcp
 firewall-cmd --reload
+systemctl restart zabbix-server zabbix-agent nginx php-fpm
 echo 'change on file /etc/nginx/conf.d/zabbix.conf and access website with http://ip_address/setup.php'
 echo 'Comment server in file /etc/nginx/nginx.conf'
 echo 'systemctl restart zabbix-server zabbix-agent nginx php-fpm'
