@@ -140,9 +140,9 @@ def main(zabbix_):
 
 
 if __name__ == '__main__':
-    zabbix_url = 'http://10.100.1.19'
-    zabbix_username = 'sa.trieutm'
-    zabbix_password = 'Maiiunguoi2##'
+    zabbix_url = 'http://192.168.0.1'
+    zabbix_username = 'Admin'
+    zabbix_password = 'zabbix'
 
     zabbix_ = zabbix_connect.connection(zabbix_url,zabbix_username,zabbix_password)
     main(zabbix_)
