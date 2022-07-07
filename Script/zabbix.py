@@ -299,28 +299,6 @@ def main(zabbix_,directory,file_type,call_type,group_cache,host_cache):
             gh = get_hosts(zabbix_,group2groupid)
         except Exception as e:
             logging.exception(e)
-# For Test
-# if __name__ == "__main__":
-#     zabbix_url = 'http://10.100.1.19'
-#     zabbix_username = 'sa.trieutm'
-#     zabbix_password = 'Maiiunguoi2##'
-#     directory = '.'
-#     type = 'import-host'
-    
-#     zabbix_ = connection(zabbix_url, zabbix_username, zabbix_password)
-#     group2groupid={}
-#     host2hostid={}
-
-#     group2groupid = get_hostgroups_cache(zabbix_)
-#     host2hostid = get_hosts_cache(zabbix_)
-#     main(
-#         zabbix_=zabbix_,
-#         directory=directory,
-#         file_type=type,
-#         group_cache=group2groupid,
-#         host_cache=host2hostid,
-#     )
-
 ## For running
 if __name__ == "__main__":
     args = parse_args()
