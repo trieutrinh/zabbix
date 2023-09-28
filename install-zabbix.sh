@@ -10,8 +10,10 @@ dnf clean all
 dnf install zabbix-server-pgsql zabbix-web-pgsql zabbix-nginx-conf zabbix-sql-scripts zabbix-selinux-policy zabbix-agent -y
 
 dnf install @postgresql:13 -y
-
-postgresql-setup initdb
+mkdir -p /tmp
+cd /tmp
+service postgresql initdb
+# postgresql-setup initdb
 systemctl enable postgresql
 sed -i 's/ident/md5/g' /var/lib/pgsql/data/pg_hba.conf
 systemctl restart postgresql
