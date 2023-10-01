@@ -5,7 +5,7 @@ source /etc/profile.d/bash_completion.sh
 
 #setenforce 0
 #sed -i 's/^SELINUX=.*/SELINUX=permissive/g' /etc/selinux/config
-rpm -Uvh https://repo.zabbix.com/zabbix/6.0/rhel/8/x86_64/zabbix-release-6.0-1.el8.noarch.rpm
+rpm -Uvh https://repo.zabbix.com/zabbix/6.0/rhel/8/x86_64/zabbix-release-6.0-4.el8.noarch.rpm
 dnf clean all 
 dnf install zabbix-server-pgsql zabbix-web-pgsql zabbix-nginx-conf zabbix-sql-scripts zabbix-selinux-policy zabbix-agent -y
 
@@ -13,14 +13,14 @@ dnf install @postgresql:13 -y
 mkdir -p /tmp
 cd /tmp
 service postgresql initdb
-# postgresql-setup initdb
-systemctl enable postgresql
 sed -i 's/ident/md5/g' /var/lib/pgsql/data/pg_hba.conf
+systemctl enable postgresql
 systemctl restart postgresql
+
 sudo -u postgres createuser --pwprompt zabbix
 ##Check Password input, sample PassW0rd, 
 sudo -u postgres createdb -O zabbix zabbix 
-zcat /usr/share/doc/zabbix-sql-scripts/postgresql/server.sql.gz | sudo -u zabbix psql zabbix 
+zcat /usr/share/zabbix-sql-scripts/postgresql/server.sql.gz | sudo -u zabbix psql zabbix 
 mv /etc/zabbix/zabbix_server.conf /etc/zabbix/zabbix_server.conf.bk
 cat <<EOF > /etc/zabbix/zabbix_server.conf
 LogFile=/var/log/zabbix/zabbix_server.log
