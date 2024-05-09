@@ -1,0 +1,147 @@
+#!/bin/bash
+
+DB_TYPE="POSTGRES"
+DB_VERSION=15
+ZABBIX_VERSION="6.0"
+ZABBIX_RELEASE="latest"
+
+
+get_ostype() {
+    local __return=$1
+    DETECTION_STRING="/etc/*-release"
+    if [[ $(ls ${DETECTION_STRING}) ]]; then
+        OS=$( cat ${DETECTION_STRING} | grep ^ID= | awk -F= '{print $2}' | tr -cd [:alpha:])
+        if [ $? -eq 0 ] && [ "$__return" ]; then
+            eval $__return="${OS}"
+            return 0
+        fi
+    else
+        __return="Unknown"
+        return 1;
+    fi
+}
+
+get_osversion() {
+    local __return=$1
+    DETECTION_STRING="/etc/*-release"
+    if [[ $(ls ${DETECTION_STRING}) ]]; then
+        OSLEVEL=$(cat ${DETECTION_STRING} | grep VERSION_ID | sed 's/[^0-9]*\([0-9]*\).*/\1/')
+        if [ $? -eq 0 ] && [ "$__return" ]; then
+            eval $__return="${OSLEVEL}"
+            return 0
+        fi
+    else
+        __return="Unknown"
+        return 1;
+    fi
+}
+check_license() {
+    local __return=$1
+    LICENSE=$(sudo subscription-manager list | grep ^Status: | awk '{print $2}')
+}
+install_dependancies() {
+    get_ostype OSTYPE
+    echo "[INFO] Start OS Updates"
+    if [ "$OSTYPE" == "ubuntu" ]; then
+        sudo apt update -y
+        sudo apt install -y  wget vim
+    elif [ "$OSTYPE" == "centos" ]; then
+        sudo yum update -y
+        sudo yum install -y bash-completion yum-utils wget vim
+    elif [ "$OSTYPE" == "rhel" ]; then
+        check_license LIC_STATUS
+        if [ "$LIC_STATUS" == "Not Subscribed" ]; then
+            echo "[ERROR] Please Subscription RHEL"
+            exit 1
+        else
+            sudo dnf update -y
+            sudo dnf install -y yum-utils bash-completion wget vim
+        fi
+    else
+        echo "[ERROR] No support OS ${OSTYPE}"
+        exit 1
+    fi
+}
+install_on_rhel() {
+
+    get_ostype OSTYPE
+    get_osversion OSLEVEL
+    check_license LIC_STATUS
+    if [ "$LIC_STATUS" == "Not Subscribed" ]; then
+        echo "[ERROR] Please Subscription RHEL"
+        exit 1
+    else
+        sudo dnf update -y
+        sudo dnf install -y yum-utils bash-completion wget vim
+
+        sudo rpm -Uvh https://repo.zabbix.com/zabbix/${ZABBIX_VERSION}/${OSTYPE}/${OSLEVEL}/x86_64/zabbix-release-${ZABBIX_RELEASE}.el${OSLEVEL}.noarch.rpm
+        sudo dnf clean all
+        sudo dnf install zabbix-server-pgsql zabbix-web-pgsql zabbix-nginx-conf zabbix-sql-scripts zabbix-selinux-policy zabbix-agent -y
+
+    fi
+
+}
+
+install_db() {
+    local psql_version=$1
+    sudo dnf install @postgresql:${psql_version} -y
+    sudo mkdir -p /tmp
+    sudo cd /tmp
+    # sudo service postgresql initdb
+    /usr/bin/postgresql-setup --initdb --unit postgresql
+
+
+    sudo sed -i 's/ident/md5/g' /var/lib/pgsql/data/pg_hba.conf
+    sudo systemctl enable postgresql
+    sudo systemctl restart postgresql
+    su postgres -c "psql -c \"CREATE USER zabbix with PASSWORD 'PassW0rd';\""
+    sudo -u postgres createdb -O zabbix zabbix
+    zcat /usr/share/zabbix-sql-scripts/postgresql/server.sql.gz | sudo -u zabbix psql zabbix 
+}
+
+config_zabbix() {
+    mv /etc/zabbix/zabbix_server.conf /etc/zabbix/zabbix_server.conf.bk
+    cat <<EOF > /etc/zabbix/zabbix_server.conf
+LogFile=/var/log/zabbix/zabbix_server.log
+LogFileSize=100
+PidFile=/run/zabbix/zabbix_server.pid
+SocketDir=/run/zabbix
+DBName=zabbix
+DBUser=zabbix
+DBPassword=PassW0rd
+StartPollers=25
+StartPollersUnreachable=25
+StartPingers=500
+SNMPTrapperFile=/var/log/snmptrap/snmptrap.log
+CacheSize=4G
+HistoryCacheSize=512M
+HistoryIndexCacheSize=512M
+ValueCacheSize=1G
+Timeout=4
+LogSlowQueries=3000
+StatsAllowedIP=127.0.0.1
+AllowUnsupportedDBVersions=1
+EOF
+    
+    sed -i 's/\#//g' /etc/nginx/conf.d/zabbix.conf
+    systemctl restart zabbix-server zabbix-agent nginx php-fpm
+    systemctl enable zabbix-server zabbix-agent nginx php-fpm 
+}
+
+config_firewall() {
+    firewall-cmd --permanent --add-port=10050/tcp 
+    firewall-cmd --permanent --add-port=10051/tcp 
+    firewall-cmd --permanent --add-port=80/tcp
+    firewall-cmd --reload 
+}
+reload_zabbix() {
+
+    systemctl restart zabbix-server zabbix-agent nginx php-fpm
+    systemctl enable zabbix-server zabbix-agent nginx php-fpm
+}
+
+# install_dependancies
+# echo "LOL"
+install_db $DB_VERSION
+install_on_rhel
+config_zabbix
