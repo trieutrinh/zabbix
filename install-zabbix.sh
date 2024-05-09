@@ -52,6 +52,7 @@ firewall-cmd --permanent --add-port=10050/tcp
 firewall-cmd --permanent --add-port=10051/tcp 
 firewall-cmd --permanent --add-port=80/tcp
 firewall-cmd --reload
+sed  -i "s/listen          8080;/listen          80;/" /etc/nginx/conf.d/zabbix.conf
 systemctl restart zabbix-server zabbix-agent nginx php-fpm
 echo 'change on file /etc/nginx/conf.d/zabbix.conf and access website with http://ip_address/setup.php'
 echo 'Comment server in file /etc/nginx/nginx.conf'
