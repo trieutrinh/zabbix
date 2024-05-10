@@ -75,6 +75,7 @@ install_on_rhel() {
         sudo dnf install -y yum-utils bash-completion wget vim
 
         # rpm -Uvh https://repo.zabbix.com/zabbix/${ZABBIX_VERSION}/${OSTYPE}/${OSLEVEL}/x86_64/zabbix-release-${ZABBIX_RELEASE}.el${OSLEVEL}.noarch.rpm &
+        rpm -Uvh https://repo.zabbix.com/zabbix/6.0/rhel/8/x86_64/zabbix-release-6.0-4.el8.noarch.rpm
         echo "Next step"
         sleep 2
         # dnf clean all
