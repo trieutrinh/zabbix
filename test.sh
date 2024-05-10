@@ -145,7 +145,7 @@ reload_zabbix() {
 install_on_rhel
 install_db $DB_VERSION
 config_zabbix
-
+config_firewall
 
 
 
