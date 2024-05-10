@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -xe
 DB_TYPE="POSTGRES"
 DB_VERSION=15
 ZABBIX_VERSION="6.0"
