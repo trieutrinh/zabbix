@@ -77,8 +77,8 @@ install_on_rhel() {
         sudo rpm -Uvh https://repo.zabbix.com/zabbix/${ZABBIX_VERSION}/${OSTYPE}/${OSLEVEL}/x86_64/zabbix-release-${ZABBIX_RELEASE}.el${OSLEVEL}.noarch.rpm
         sudo dnf clean all
         sudo dnf install zabbix-server-pgsql zabbix-web-pgsql zabbix-nginx-conf zabbix-sql-scripts zabbix-selinux-policy zabbix-agent -y
-        local psql_version=$1
-        sudo dnf install @postgresql:${psql_version} -y
+        
+        sudo dnf install @postgresql:${DB_VERSION} -y
 
     fi
 }
@@ -143,7 +143,7 @@ reload_zabbix() {
 # echo "LOL"
 
 install_on_rhel
-install_db $DB_VERSION
+install_db 
 config_zabbix
 config_firewall
 
