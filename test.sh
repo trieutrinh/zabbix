@@ -114,10 +114,10 @@ StartPollers=25
 StartPollersUnreachable=25
 StartPingers=500
 SNMPTrapperFile=/var/log/snmptrap/snmptrap.log
-CacheSize=4G
-HistoryCacheSize=512M
-HistoryIndexCacheSize=512M
-ValueCacheSize=1G
+CacheSize=32M
+HistoryCacheSize=32M
+HistoryIndexCacheSize=32M
+ValueCacheSize=32M
 Timeout=4
 LogSlowQueries=3000
 StatsAllowedIP=127.0.0.1
@@ -126,6 +126,7 @@ EOF
     
     sed -i 's/\#//g' /etc/nginx/conf.d/zabbix.conf
     sed  -i "s/listen          8080;/listen          80;/" /etc/nginx/conf.d/zabbix.conf
+    # sed -i "s/server_name     example.com;/server_name     0.0.0.0;/" /etc/nginx/conf.d/zabbix.conf
     systemctl restart zabbix-server zabbix-agent nginx php-fpm
     systemctl enable zabbix-server zabbix-agent nginx php-fpm 
 }
