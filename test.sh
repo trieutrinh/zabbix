@@ -96,10 +96,10 @@ install_db() {
     sudo systemctl enable postgresql
     sudo systemctl restart postgresql
     su postgres -c "psql -c \"CREATE USER zabbix with PASSWORD 'PassW0rd';\""
-    su postgres -c "psql -c \"CREATE DATABASE zabbix WITH OWNER zabbix;\""
-    su postgres -c "psql -c \"GRANT ALL PRIVILEGES ON DATABASE zabbix TO zabbix;\""
+    
     sudo -u postgres createdb -O zabbix zabbix
     zcat /usr/share/zabbix-sql-scripts/postgresql/server.sql.gz | sudo -u zabbix psql zabbix 
+    su postgres -c "psql -c \"GRANT ALL PRIVILEGES ON DATABASE zabbix TO zabbix;\""
 }
 
 config_zabbix() {
