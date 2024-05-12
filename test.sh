@@ -128,7 +128,7 @@ EOF
     
     sed -i 's/\#//g' /etc/nginx/conf.d/zabbix.conf
     sed  -i "s/listen          8080;/listen          80;/" /etc/nginx/conf.d/zabbix.conf
-    sed  -i "s/root         /usr/share/nginx/html;/root        /usr/share/zabbix;/g" /etc/nginx/nginx.conf
+    sed  -i "s/root         \/usr\/share\/nginx\/html;/root         \/usr\/share\/zabbix;/g;" /etc/nginx/nginx.conf
     # sed -i "s/server_name     example.com;/server_name     localhost;/" /etc/nginx/conf.d/zabbix.conf
     systemctl restart zabbix-server zabbix-agent nginx php-fpm
     systemctl enable zabbix-server zabbix-agent nginx php-fpm 
