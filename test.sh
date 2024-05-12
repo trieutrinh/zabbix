@@ -4,7 +4,7 @@ DB_TYPE="POSTGRES"
 DB_VERSION=15
 ZABBIX_VERSION="6.0"
 ZABBIX_RELEASE="latest"
-
+IP_A=$(ip a | grep inet.*brd | awk '{print $2}' | awk -F/ '{print $1}')
 
 get_ostype() {
     local __return=$1
@@ -147,7 +147,7 @@ reload_software() {
 }
 result() {
     clear
-    echo "Access website with http://ip_address/setup.php for config Zabbix"
+    echo "Access website with http://${IP_A}/setup.php for config Zabbix"
     echo "Information for config database: "
     echo "Username: zabbix"
     echo "Password: PassW0rd"
