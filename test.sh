@@ -71,7 +71,7 @@ install_on_rhel() {
         echo "[ERROR] Please Subscription RHEL"
         exit 1
     else
-        sudo dnf update -y
+        # sudo dnf update -y
         sudo dnf install -y yum-utils bash-completion wget vim
 
         # rpm -Uvh https://repo.zabbix.com/zabbix/${ZABBIX_VERSION}/${OSTYPE}/${OSLEVEL}/x86_64/zabbix-release-${ZABBIX_RELEASE}.el${OSLEVEL}.noarch.rpm &
