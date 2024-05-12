@@ -76,7 +76,6 @@ install_on_rhel() {
 
         # rpm -Uvh https://repo.zabbix.com/zabbix/${ZABBIX_VERSION}/${OSTYPE}/${OSLEVEL}/x86_64/zabbix-release-${ZABBIX_RELEASE}.el${OSLEVEL}.noarch.rpm &
         rpm -Uvh https://repo.zabbix.com/zabbix/6.0/rhel/8/x86_64/zabbix-release-6.0-4.el8.noarch.rpm
-        echo "Next step"
         sleep 2
         # dnf clean all
         dnf install zabbix-server-pgsql zabbix-web-pgsql zabbix-nginx-conf zabbix-sql-scripts zabbix-selinux-policy zabbix-agent -y
@@ -89,7 +88,6 @@ install_on_rhel() {
 install_db() {
     sudo mkdir -p /tmp
     sudo cd /tmp
-    # sudo service postgresql initdb
     /usr/bin/postgresql-setup --initdb --unit postgresql
 
     sudo sed -i 's/ident/md5/g' /var/lib/pgsql/data/pg_hba.conf
@@ -103,6 +101,10 @@ install_db() {
 }
 
 config_zabbix() {
+    clear
+    echo "Config zabbix Server"
+    sleep 3
+
     mv /etc/zabbix/zabbix_server.conf /etc/zabbix/zabbix_server.conf.bk
     cat <<EOF > /etc/zabbix/zabbix_server.conf
 LogFile=/var/log/zabbix/zabbix_server.log
@@ -128,10 +130,8 @@ EOF
     
     sed -i 's/\#//g' /etc/nginx/conf.d/zabbix.conf
     sed  -i "s/listen          8080;/listen          80;/" /etc/nginx/conf.d/zabbix.conf
-    sed  -i "s/root         \/usr\/share\/nginx\/html;/root         \/usr\/share\/zabbix;/g;" /etc/nginx/nginx.conf
-    # sed -i "s/server_name     example.com;/server_name     localhost;/" /etc/nginx/conf.d/zabbix.conf
-    systemctl restart zabbix-server zabbix-agent nginx php-fpm
-    systemctl enable zabbix-server zabbix-agent nginx php-fpm 
+    sed -i '38,57 s/^/#/' /etc/nginx/nginx.conf
+    sed -i "s/server_name     example.com;/server_name     localhost;/" /etc/nginx/conf.d/zabbix.conf
 }
 
 config_firewall() {
@@ -140,21 +140,29 @@ config_firewall() {
     firewall-cmd --permanent --add-port=80/tcp
     firewall-cmd --reload 
 }
-reload_zabbix() {
+reload_software() {
 
     systemctl restart zabbix-server zabbix-agent nginx php-fpm
     systemctl enable zabbix-server zabbix-agent nginx php-fpm
 }
-
-# install_dependancies
-# echo "LOL"
+result() {
+    clear
+    echo "Access website with http://ip_address/setup.php for config Zabbix"
+    echo "Information for config database: "
+    echo "Username: zabbix"
+    echo "Password: PassW0rd"
+    echo "==================================="
+    echo "Access Zabbix Dashboard:"
+    echo "Username: Admin"
+    echo "Password: zabbix"
+}
 
 install_on_rhel
 install_db 
 config_zabbix
 config_firewall
-
-
+reload_software
+result
 
 # Config default
 
